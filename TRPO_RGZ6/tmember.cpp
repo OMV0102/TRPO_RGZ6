@@ -42,7 +42,9 @@ class TMember
 		// Дифференцирование одночлена
 		void Diff() 
 		{
-			if (this->c != 0)
+			this->c *= this->d;
+			this->d--;
+			/*if (this->c != 0)
 			{
 				if (this->d != 0)
 				{
@@ -51,7 +53,7 @@ class TMember
 				}
 				else if (this->d == 0)
 					this->c = 0;
-			}
+			}*/
 		}
 		
 		//Вычисление значения одночлена

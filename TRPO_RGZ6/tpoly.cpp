@@ -7,11 +7,14 @@ class TPoly
 
 		void RemoveZero()  // Удаление нулевых одночленов
 		{
-			for (int i = 0; i < this->Count() - 1;)
-				if (this->members[i].Coeff() == 0 && this->members[i].Degree() == 0)
-					this->members.erase(this->members.begin() + i);
-				else
-					i++;
+			if (this->Count() > 1) 
+			{
+				for (int i = 0; i < this->Count() && this->Count() > 1;)
+					if (this->members[i].Coeff() == 0)
+						this->members.erase(this->members.begin() + i);
+					else
+						i++;
+			}
 		}
 
 	public:
@@ -28,11 +31,13 @@ class TPoly
 				this->members.push_back(TMember(P.members[i]));
 		}
 
+		// подсчет количества одночленов в полиноме
 		int Count() const 
 		{
 			return this->members.size();
 		}
 
+		// поиск идекса полинома по степени
 		TMember* FindIndByDeg(int n) 
 		{
 			TMember *res;
@@ -64,6 +69,7 @@ class TPoly
 			this->members.push_back(TMember());
 		}
 
+		// проверка для нормализации полинома
 		bool reg()
 		{
 			int i = 0;
@@ -97,34 +103,29 @@ class TPoly
 					i++;
 				}
 			}
+		}
 
-
-			
-			/*int indmaxDeg = 0;
-			bool indCnange = false;
-			TMember *m = new TMember();
-			for (int i = 0; i < this->Count(); i++)
+		// ПРИВЕДЕНИЕ ПОДОБНЫХ
+		void similar()
+		{
+			TPoly *buf = new TPoly(0, 0);
+			for (int i = 0; i < this->Count();)
 			{
-				for (int j = i; j < this->Count()-1; j++)
-				{
+				TMember mem;
+				mem.SetCoeff(this->members[i].Coeff());
+				mem.SetDeg(this->members[i].Degree());
 
-					if (this->members[j].Degree() > this->members[indmaxDeg].Degree())
+				int s = 0;
+				for (int j = i + 1; j < this->Count(); j++)
+					if (mem.Degree() == this->members[j].Degree())
 					{
-						indmaxDeg = j;
-						indCnange = true;
+						mem += this->members[j];
+						s++;
 					}
-				}
-				if (indCnange)
-				{
-					m->SetDeg(this->members[i].Degree());
-					m->SetCoeff(this->members[i].Coeff());
-					this->members[i].SetDeg(this->members[indmaxDeg].Degree());
-					this->members[i].SetCoeff(this->members[indmaxDeg].Coeff());
-					this->members[indmaxDeg].SetDeg(m->Degree());
-					this->members[indmaxDeg].SetCoeff(m->Coeff());
-					indCnange = false;
-				}
-			}*/
+				buf->members.push_back(mem);
+				i += s + 1;
+			}
+			*this = *buf;
 		}
 
 		// оператор СКОБКИ
@@ -146,22 +147,14 @@ class TPoly
 				this->members.push_back(TMember(q));
 		}
 
-		// оператор МИНУС РАВНО
-		void operator-=(TMember& q)
-		{
-			TMember *cur = this->FindIndByDeg(q.Degree());
-			if (cur)
-				*cur -= q;
-			else
-				this->members.push_back(TMember(q));
-		}
-
 		// оператор ПЛЮС
 		TPoly* operator+(TPoly& T) 
 		{
 			TPoly *res = new TPoly(*this);
 			for (int i = 0; i < T.Count(); i++)
 				*res += *T[i];
+			res->RemoveZero();
+			res->Norm();
 			return res;
 		}
 
@@ -175,15 +168,21 @@ class TPoly
 		// оператор УМНОЖИТЬ
 		TPoly* operator*(TPoly& B)
 		{
-			std::vector<TPoly> cont;
-			for (int i = 0; i < B.Count(); i++) {
-				cont.push_back(*this);
-				cont[i] *= *B[i];
-			}
-			TPoly *res = new TPoly();
-			for (int i = 0; i < cont.size(); i++)
-				res = *res + cont[i];
+			TPoly *res = new TPoly(0, 0);
+			for (int i = 0; i < this->Count(); i++)
+				for (int j = 0; j < B.Count(); j++)
+				{
+					TMember mem;
+					mem.SetCoeff(this->members[i].Coeff());
+					mem.SetDeg(this->members[i].Degree());
+					mem *= B.members[j];
+					res->members.push_back(mem);
+				}
+			res->RemoveZero();
+			res->Norm();
+			res->similar();
 			return res;
+			
 		}
 
 		// оператор МИНУС
@@ -196,6 +195,8 @@ class TPoly
 				*res += *q[i];
 				-q;
 			}
+			res->RemoveZero();
+			res->Norm();
 			return res;
 		}
 
