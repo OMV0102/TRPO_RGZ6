@@ -1,7 +1,5 @@
 #include <vector>
-
 const short size = 10;
-
 class TMember 
 {
 	private:
@@ -44,16 +42,12 @@ class TMember
 		{
 			this->c *= this->d;
 			this->d--;
-			/*if (this->c != 0)
+			if (this->c != 0)
 			{
-				if (this->d != 0)
-				{
-					this->c *= this->d;
-					this->d--;
-				}
-				else if (this->d == 0)
-					this->c = 0;
-			}*/
+				this->c *= this->d;
+				this->d--;
+
+			}
 		}
 		
 		//Вычисление значения одночлена
